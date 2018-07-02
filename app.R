@@ -7,7 +7,7 @@ require(ggplot2)
 ui <- fluidPage(
   
   
-  
+   
   fileInput("inputFile", "Choose CSV File",
             multiple = TRUE,
             accept = c("text/csv",
@@ -34,38 +34,49 @@ ui <- fluidPage(
   
   div(),
   
-  div(style="display:inline-block",
-      numericInput("x_min", "x axis minimum",
-                   value=""
-      )),
+  checkboxInput("axes", "Modify Axis limits"),
+  conditionalPanel(
+    condition = "input.axes == true",
+    div(style="display:inline-block",
+        numericInput("x_min", "x axis minimum",
+                     value=""
+        )),
+    
+    div(style="display:inline-block",
+        numericInput("x_max", "x axis maximum",
+                     value=""
+        )),
+    
+    
+    div(),
+    
+    div(style="display:inline-block",
+        numericInput("y_min", "y axis minimum",
+                     value=""
+        )),
+    
+    div(style="display:inline-block",
+        numericInput("y_max", "y axis maximum",
+                     value=""
+        ))
+    
+  ),
   
-  div(style="display:inline-block",
-      numericInput("x_max", "x axis maximum",
-                   value=""
-      )),
-  
-  
+
   div(),
   
-  div(style="display:inline-block",
-      numericInput("y_min", "y axis minimum",
-                   value=""
-      )),
+  conditionalPanel(
+    condition = "input.select == 2",
+      div(style="display:inline-block",
+          sliderInput("variation", "Scatter Amount", 0, 1, 0.15
+          )),
+      
+      div(style="display:inline-block",
+          sliderInput("point_size", "Point Size", 1, 5, 1.5, 0.1
+          ))
+  ),
   
-  div(style="display:inline-block",
-      numericInput("y_max", "y axis maximum",
-                   value=""
-      )),
-  
-  div(),
-  
-  div(style="display:inline-block",
-      sliderInput("variation", "Scatter Amount", 0, 1, 0.15
-      )),
-  
-  div(style="display:inline-block",
-      sliderInput("point_size", "Point Size", 1, 5, 1.5, 0.1
-      )),
+ 
   
   div(),
   
@@ -103,7 +114,7 @@ server <- function(input, output, session) {
     
     output$TextArea <- renderText({
       
-      "test text"
+      "test text 22"
       
     })
     
