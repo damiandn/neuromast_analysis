@@ -10,7 +10,7 @@ library(ggplot2)
 require(ggplot2)
 
 ui <- fluidPage(
-  
+  tags$head(tags$script(src = "message-handler.js")),
   
    
   fileInput("inputFile", "Choose CSV File",
@@ -63,15 +63,20 @@ ui <- fluidPage(
     div(style="display:inline-block",
         numericInput("y_max", "y axis maximum",
                      value=""
-        ))
+        )),
+    
+    div(),
+    
+    actionButton("set_axis_limits", "Update Axes")
     
   ),
   
 
   div(),
+ 
   
   conditionalPanel(
-    condition = "input.select == 2 || input.select == 4",
+    condition = "input.select == 2 || input.select == 3",
       div(style="display:inline-block",
           sliderInput("variation", "Scatter Amount", 0, 1, 0.15
           )),
@@ -86,7 +91,7 @@ ui <- fluidPage(
   div(),
   
   conditionalPanel(
-    condition = "input.select == 3",
+    condition = "input.select == 4",
     checkboxInput("boxplot_color", "Color-code box plot", FALSE)
     ),
   
@@ -135,16 +140,17 @@ server <- function(input, output, session) {
     })
     
     
-    #make a density plot
+      ############################### make a denisty plot ##########################################    
     if (input$select == 1) {
       
       output$PlotArea <- renderPlot({
         
-        
+        #update the axis labels
         updateTextInput(session, "y_axis", label = "Y axis label", value = "Density")
         updateTextInput(session, "x_axis", label = "X axis label", value = "Distance")
         
         
+        #make the plot
         if (!isTruthy(input$x_min) || !isTruthy(input$x_max) || !isTruthy(input$y_min) || !isTruthy(input$y_max)) {
           density_plot <- ggplot(dfs, aes(x=values)) + geom_density(aes(group=ind, colour=ind, fill=ind), alpha=0.3) + labs(x = input$x_axis) + labs(y = input$y_axis) + labs(title = input$GraphTitle) + theme(legend.title=element_blank())
           show(density_plot)
@@ -153,10 +159,43 @@ server <- function(input, output, session) {
           show(density_plot)
         }
         
+        
+        # observeEvent(input$set_axis_limits, {
+        # 
+        #   
+        #   isolate({
+        #   yDims = GetYAxisDimensions(density_plot)
+        #   xDims = GetXAxisDimensions(density_plot)
+        #   print(yDims)
+        #   print(xDims)
+        #   })
+        #   
+        #   
+        #   updateNumericInput(session, "y_min", value = yDims[1])
+        #   updateNumericInput(session, "y_max", value = yDims[2])
+        #   updateNumericInput(session, "x_min", value = xDims[1])
+        #   updateNumericInput(session, "x_max", value = xDims[2])
+        # 
+        # 
+        # })
+
+       
+      
+       
+        
+          
+          
+    
+        
+      
+          
+        
+        
       })
       
       
-      #make a scatter plot    
+      
+      ############################### make a scatter plot ##########################################    
     }else if (input$select == 2) {
       
       
@@ -178,7 +217,7 @@ server <- function(input, output, session) {
         }
       })
       
-      #make a box-and-whisker plot  
+      ############################### make a density + scatter plot ##########################################     
     }else if (input$select == 3) {
       
       output$PlotArea <- renderPlot({
@@ -203,6 +242,8 @@ server <- function(input, output, session) {
         show(density_plot)
       })
       
+      
+      ############################### make a box-and-whisker plot ##########################################    
     }else if (input$select == 4) {
       
       updateTextInput(session, "y_axis", label = "Y axis label", value = "Distance")
@@ -224,7 +265,29 @@ server <- function(input, output, session) {
     
   })
   
+ 
   
 }
+
+
+
+
+GetYAxisDimensions <- function(ggplot_object) {
+
+  myggpyrange <- ggplot_build(ggplot_object)$layout$panel_ranges[[1]]$y.range
+  return(myggpyrange)
+    
+}
+
+GetXAxisDimensions <- function(ggplot_object) {
+
+  myggpxrange <-  ggplot_build(ggplot_object)$layout$panel_ranges[[1]]$x.range
+  return(myggpxrange)
+}
+
+
+
+
+
 
 shinyApp(ui = ui, server = server)
